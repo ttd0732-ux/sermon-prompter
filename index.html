@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>설교 프롬프터</title>
+<meta name="description" content="설교 원고를 강단용 텔레프롬프터로 변환해 주는 도구">
+<meta property="og:title" content="설교 프롬프터">
+<meta property="og:description" content="설교 원고를 강단용 프롬프터로 바로 변환">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://sermon-prompter.vercel.app/og-image.jpg?v=20261019">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a3c34">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#1a3c34;--gold:#c9a227;--bg:#f5f3ec;--card:#ffffff;--text:#222;--muted:#777;--line:#e3ded2}
+body{font-family:'Noto Serif KR','Batang',바탕,serif;background:var(--bg);color:var(--text);line-height:1.6}
+header{background:var(--green);color:#fff;padding:18px 20px;text-align:center}
+header h1{font-size:22px;letter-spacing:2px}
+header h1 .gold{color:var(--gold)}
+header p{font-size:13px;opacity:.85;margin-top:6px}
+.contact{font-size:12px;opacity:.7;margin-top:4px}
+main{display:flex;gap:16px;max-width:1400px;margin:16px auto;padding:0 16px;align-items:flex-start}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+#input-panel{flex:0 0 380px}
+#preview-panel{flex:1;min-width:0}
+h2{font-size:16px;margin-bottom:12px;color:var(--green);border-bottom:2px solid var(--gold);padding-bottom:6px}
+label{display:block;font-size:13px;font-weight:bold;margin:10px 0 4px;color:#444}
+input[type=text],input[type=date],select,textarea{width:100%;padding:9px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;font-family:inherit}
+textarea#manuscript{min-height:280px;resize:vertical;line-height:1.7}
+.row2{display:flex;gap:8px}.row2>div{flex:1}
+.hint{font-size:12px;color:var(--muted);background:#faf8f2;border:1px dashed var(--line);border-radius:8px;padding:10px;margin-top:10px}
+.hint b{color:var(--green)}
+#parse-status{font-size:13px;color:var(--green);margin-top:8px;font-weight:bold}
+.btn{display:inline-block;padding:10px 16px;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin:6px 4px 0 0;font-family:inherit}
+.btn-green{background:var(--green);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gray{background:#e8e4d8;color:#444}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn small{font-weight:normal}
+/* 미리보기 */
+#prompter-shell{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#111}
+#ctrl{background:#1c1c1c;color:#ddd;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+#ctrl button{background:#333;color:#fff;border:1px solid #555;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit}
+#ctrl button.on{background:var(--gold);border-color:var(--gold);color:#111;font-weight:bold}
+#ctrl select{background:#333;color:#fff;border:1px solid #555;border-radius:6px;padding:5px;font-size:12px}
+#ctrl .sp{flex:1}
+#timer{font-variant-numeric:tabular-nums;font-weight:bold;color:var(--gold)}
+#toc{background:#222;color:#ccc;padding:8px 12px;font-size:13px;max-height:110px;overflow-y:auto;border-top:1px solid #333}
+#toc span{cursor:pointer;margin-right:10px;padding:2px 6px;border-radius:4px}
+#toc span:hover{background:#444;color:#fff}
+#screen{height:480px;overflow-y:auto;padding:40px 36px;background:#fdfbf6;color:#1a1a1a;position:relative;transition:background .3s}
+#screen.dark{background:#0d0d0d;color:#f2ede0}
+#screen .p-meta{text-align:center;margin-bottom:24px}
+#screen .p-church{font-size:15px;opacity:.75}
+#screen .p-title{font-size:1.9em;font-weight:bold;margin:10px 0;color:var(--green)}
+#screen.dark .p-title{color:var(--gold)}
+#screen .p-verse{display:inline-block;background:#eef3e8;border:1px solid #cdd8c2;padding:4px 14px;border-radius:20px;font-size:15px;margin-top:6px}
+#screen.dark .p-verse{background:#222;border-color:#444}
+#screen .p-sec{font-size:1.25em;font-weight:bold;margin:34px 0 12px;color:var(--green);border-left:5px solid var(--gold);padding-left:12px}
+#screen.dark .p-sec{color:var(--gold)}
+#screen .p-para{margin:0 0 16px;font-size:1em}
+#screen .p-read{margin-left:8px;font-size:.7em;background:#ddd;border:none;border-radius:4px;padding:2px 8px;cursor:pointer;vertical-align:middle}
+#screen.dark .p-read{background:#444;color:#fff}
+#guide-line{position:sticky;top:50%;border-top:2px dashed rgba(200,60,60,.7);margin:0 -36px;pointer-events:none;display:none}
+#guide-line.show{display:block}
+#guide-line::after{content:'읽는 줄';position:absolute;right:0;top:-22px;font-size:11px;color:#c83c3c;background:rgba(255,255,255,.85);padding:0 6px;border-radius:4px}
+footer{text-align:center;padding:18px;font-size:13px;color:var(--muted)}
+kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-size:12px}
+#saved-list{margin-top:8px;font-size:13px}
+#saved-list .item{display:flex;justify-content:space-between;align-items:center;background:#faf8f2;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:6px}
+#saved-list button{font-size:12px;padding:3px 9px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;margin-left:4px}
+@media(max-width:900px){main{flex-direction:column}#input-panel{flex:1;width:100%}#screen{height:380px}}
+</style>
+</head>
+<body>
+<header>
+<h1>✝ <span class="gold">설교 프롬프터</span></h1>
+<p>설교 원고를 강단용 텔레프롬프터로 바로 변환합니다 · 로그인과 서버 없이 이 브라우저 안에서만 동작합니다</p>
+<div class="contact">앱 문의) shs목사 · ttd0732@hanmail.net</div>
+</header>
+<main>
+<section class="panel" id="input-panel">
+<h2>📝 원고 입력</h2>
+<div class="row2">
+<div><label>설교 제목</label><input type="text" id="f-title" placeholder="예: 믿음으로 얻는 칭의"></div>
+<div><label>교회명</label><input type="text" id="f-church" value="살아나는교회"></div>
+</div>
+<div class="row2">
+<div><label>예배 구분</label><input type="text" id="f-service" placeholder="예: 주일 오전 예배"></div>
+<div><label>설교 일자</label><input type="date" id="f-date"></div>
+</div>
+<div class="row2">
+<div><label>설교자</label><input type="text" id="f-preacher" value="신현성 목사"></div>
+<div><label>본문 구절</label><input type="text" id="f-verse" placeholder="예: 누가복음 18:9-14"></div>
+</div>
+<label>설교 원고 전체</label>
+<textarea id="manuscript" placeholder="여기에 설교 원고를 붙여넣으세요."></textarea>
+<div id="parse-status"></div>
+<div class="hint">
+<b>소제목 자동 인식 규칙</b><br>
+· <b>##</b> 로 시작하는 줄 &nbsp;·&nbsp; <b>[대괄호]</b> 로 감싼 줄<br>
+· 도입/서론/본론/결론/적용/마무리 로 시작하는 짧은 줄<br>
+· <b>1.</b> <b>2.</b> 로 시작하는 짧은 줄<br>
+원고 본문은 한 글자도 고치지 않고 그대로 담습니다.
+</div>
+<div style="margin-top:10px">
+<button class="btn btn-green" id="btn-download" disabled>⬇ 프롬프터 HTML 다운로드</button>
+<button class="btn btn-gray" id="btn-sample">예시 넣기</button>
+</div>
+<h2 style="margin-top:18px">💾 원고 저장함</h2>
+<div class="row2">
+<div><input type="text" id="save-name" placeholder="저장 이름 (예: 10-19 주일설교)"></div>
+<div style="flex:0 0 auto"><button class="btn btn-gold" id="btn-save" style="margin:0">저장</button></div>
+</div>
+<div id="saved-list"></div>
+<div class="hint">단축키: <kbd>Space</kbd> 재생/정지 · <kbd>←</kbd><kbd>→</kbd> 속도 조절 · <kbd>Home</kbd> 처음으로</div>
+</section>
+<section class="panel" id="preview-panel">
+<h2>🖥 미리보기</h2>
+<div id="prompter-shell">
+<div id="ctrl">
+<button id="c-play">▶ 재생</button>
+<button id="c-slow">느림</button>
+<button id="c-mid" class="on">보통</button>
+<button id="c-fast">빠름</button>
+<button id="c-minus">−</button><span id="c-speed" style="min-width:34px;text-align:center">42</span><button id="c-plus">＋</button>
+<button id="c-top">↑ 처음</button>
+<span class="sp"></span>
+<span id="timer">00:00</span>
+<button id="c-timer">⏱ 타이머</button>
+</div>
+<div id="ctrl" style="border-top:1px solid #333">
+<button id="c-read-all">▶ 전체 읽기</button>
+<button id="c-read-stop">■</button>
+<select id="c-rate"><option value="1">1.0×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>
+<select id="c-voice"><option>음성 불러오는 중…</option></select>
+<span class="sp"></span>
+<button id="c-font-serif" class="on">바탕</button>
+<button id="c-font-sans">고딕</button>
+<button id="c-fminus">가−</button><span id="c-fsize" style="min-width:30px;text-align:center">30</span><button id="c-fplus">가＋</button>
+<button id="c-theme">🌙 어둡게</button>
+<button id="c-guide">읽는 줄</button>
+<button id="c-full">⛶ 전체화면</button>
+</div>
+<div id="toc"></div>
+<div id="screen"><div id="guide-line"></div><div id="p-body" style="font-size:30px"></div></div>
+</div>
+<div class="hint" id="eta-hint" style="margin-top:10px">원고를 입력하면 예상 설교 시간이 표시됩니다. (분당 약 350자 기준)</div>
+</section>
+</main>
+<footer>앱 문의) shs목사 · ttd0732@hanmail.net</footer>
+<script>
+/* ===== 설교 프롬프터 ===== */
+const $=id=>document.getElementById(id);
+const screen=$('screen'),pbody=$('p-body'),toc=$('toc');
+let sections=[],playing=false,rafId=null,speed=42,speedLevel='mid',fontSize=30,dark=false;
+let timerOn=false,timerSec=0,timerId=null,targetMin=30;
+
+/* --- 소제목 인식 --- */
+const KW=/^(도입|서론|본론|결론|적용|마무리|들어가며|나오며|맺으며)/;
+function parseSections(text){
+  const lines=text.split('\n'),secs=[];let cur={title:null,paras:[]};
+  const pushPara=t=>{if(t.trim())cur.paras.push(t.trim())};
+  for(let raw of lines){
+    const line=raw.trim();
+    if(!line){continue}
+    let title=null;
+    if(line.startsWith('##'))title=line.replace(/^##\s*/,'');
+    else if(/^\[.+\]$/.test(line))title=line.replace(/^\[|\]$/g,'');
+    else if(line.length<=24&&(KW.test(line)||/^\d+\.\s/.test(line)))title=line;
+    if(title){
+      if(cur.title||cur.paras.length)secs.push(cur);
+      cur={title:title,paras:[]};
+    }else pushPara(line);
+  }
+  if(cur.title||cur.paras.length)secs.push(cur);
+  return secs;
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+/* --- 미리보기 렌더 --- */
+function render(){
+  const title=$('f-title').value.trim(),church=$('f-church').value.trim(),
+        service=$('f-service').value.trim(),date=$('f-date').value,
+        preacher=$('f-preacher').value.trim(),verse=$('f-verse').value.trim(),
+        text=$('manuscript').value;
+  sections=parseSections(text);
+  const pc=sections.reduce((a,s)=>a+s.paras.length,0);
+  $('parse-status').textContent=text.trim()?`섹션 ${sections.length}개 · 문단 ${pc}개로 인식했습니다`:'';
+  $('btn-download').disabled=!text.trim();
+  // 예상 시간
+  const chars=text.replace(/\s/g,'').length,mins=Math.max(1,Math.round(chars/350));
+  $('eta-hint').textContent=text.trim()?`원고 ${chars.toLocaleString()}자 · 예상 설교 시간 약 ${mins}분 (분당 약 350자 기준)`:'원고를 입력하면 예상 설교 시간이 표시됩니다. (분당 약 350자 기준)';
+  // 본문
+  let h='';
+  if(title||church||service||date||preacher){
+    h+=`<div class="p-meta">`;
+    if(church||service||date)h+=`<div class="p-church">${esc([church,service,date].filter(Boolean).join(' · '))}</div>`;
+    if(title)h+=`<div class="p-title">${esc(title)}</div>`;
+    if(preacher)h+=`<div class="p-church">${esc(preacher)}</div>`;
+    if(verse)h+=`<div><span class="p-verse">📖 ${esc(verse)}</span></div>`;
+    h+=`</div>`;
+  }
+  sections.forEach((s,i)=>{
+    if(s.title)h+=`<div class="p-sec" id="sec-${i}">${esc(s.title)}<button class="p-read" data-sec="${i}">▶ 읽기</button></div>`;
+    s.paras.forEach(p=>{h+=`<div class="p-para">${esc(p)}</div>`});
+  });
+  if(!text.trim())h=`<div style="text-align:center;opacity:.5;padding:80px 0">왼쪽에 원고를 입력하면<br>여기에 프롬프터가 표시됩니다</div>`;
+  pbody.innerHTML=h;
+  pbody.style.fontSize=fontSize+'px';
+  // 목차
+  toc.innerHTML=sections.filter(s=>s.title).map((s)=>{
+    const i=sections.indexOf(s);return `<span data-goto="${i}">▸ ${esc(s.title)}</span>`;
+  }).join('')||'<span style="opacity:.5">섹션이 없습니다</span>';
+  // 섹션 읽기 버튼
+  pbody.querySelectorAll('.p-read').forEach(b=>b.onclick=e=>{e.stopPropagation();readSection(+b.dataset.sec)});
+  toc.querySelectorAll('[data-goto]').forEach(s=>s.onclick=()=>{stop();$('sec-'+s.dataset.goto).scrollIntoView({behavior:'smooth',block:'start'})});
+}
+['f-title','f-church','f-service','f-date','f-preacher','f-verse','manuscript'].forEach(id=>$(id).addEventListener('input',render));
+
+/* --- 자동 스크롤 --- */
+function tick(){
+  if(!playing)return;
+  screen.scrollTop+=speed/60;
+  if(screen.scrollTop+screen.clientHeight>=screen.scrollHeight-2)stop();
+  else rafId=requestAnimationFrame(tick);
+}
+function play(){if(playing)return;playing=true;$('c-play').textContent='⏸ 정지';$('c-play').classList.add('on');rafId=requestAnimationFrame(tick)}
+function stop(){playing=false;cancelAnimationFrame(rafId);$('c-play').textContent='▶ 재생';$('c-play').classList.remove('on')}
+$('c-play').onclick=()=>playing?stop():play();
+function setLevel(l,v){speedLevel=l;speed=v;$('c-speed').textContent=v;['c-slow','c-mid','c-fast'].forEach(id=>$(id).classList.remove('on'));$('c-'+l).classList.add('on')}
+$('c-slow').onclick=()=>setLevel('slow',22);
+$('c-mid').onclick=()=>setLevel('mid',42);
+$('c-fast').onclick=()=>setLevel('fast',72);
+$('c-minus').onclick=()=>{speed=Math.max(5,speed-4);$('c-speed').textContent=speed};
+$('c-plus').onclick=()=>{speed=Math.min(150,speed+4);$('c-speed').textContent=speed};
+$('c-top').onclick=()=>{stop();screen.scrollTo({top:0,behavior:'smooth'})};
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return;
+  if(e.code==='Space'){e.preventDefault();playing?stop():play()}
+  else if(e.key==='ArrowRight')$('c-plus').click();
+  else if(e.key==='ArrowLeft')$('c-minus').click();
+  else if(e.key==='Home')$('c-top').click();
+});
+
+/* --- 타이머 --- */
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+$('c-timer').onclick=()=>{
+  if(timerOn){timerOn=false;clearInterval(timerId);$('c-timer').classList.remove('on');return}
+  const v=prompt('목표 설교 시간(분)을 입력하세요',targetMin);
+  if(v===null)return;targetMin=Math.max(1,parseInt(v)||30);timerSec=0;timerOn=true;
+  $('c-timer').classList.add('on');
+  timerId=setInterval(()=>{timerSec++;$('timer').textContent=fmt(timerSec);
+    if(timerSec===targetMin*60)alert(`목표 시간 ${targetMin}분이 되었습니다.`)},1000);
+};
+
+/* --- TTS --- */
+let voices=[];
+function loadVoices(){voices=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('ko'));
+  const sel=$('c-voice');
+  sel.innerHTML=voices.length?voices.map((v,i)=>`<option value="${i}">${v.name}</option>`).join(''):'<option>한국어 음성 없음</option>';}
+if('speechSynthesis'in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function speak(text){
+  if(!('speechSynthesis'in window)){alert('이 브라우저는 낭독을 지원하지 않습니다.');return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  const vi=+$('c-voice').value;if(voices[vi])u.voice=voices[vi];
+  u.lang='ko-KR';u.rate=+$('c-rate').value;speechSynthesis.speak(u);
+}
+function fullText(){
+  let t='';
+  if($('f-title').value.trim())t+=$('f-title').value.trim()+'. ';
+  sections.forEach(s=>{if(s.title)t+=s.title+'. ';t+=s.paras.join(' ')+' '});
+  return t;
+}
+$('c-read-all').onclick=()=>{const t=fullText();t?speak(t):alert('읽을 원고가 없습니다.')};
+$('c-read-stop').onclick=()=>speechSynthesis&&speechSynthesis.cancel();
+function readSection(i){const s=sections[i];if(s)speak((s.title?s.title+'. ':'')+s.paras.join(' '))}
+
+/* --- 표시 설정 --- */
+$('c-font-serif').onclick=()=>{pbody.style.fontFamily="'Noto Serif KR','Batang',바탕,serif";$('c-font-serif').classList.add('on');$('c-font-sans').classList.remove('on')};
+$('c-font-sans').onclick=()=>{pbody.style.fontFamily="'Noto Sans KR','Malgun Gothic','맑은 고딕',sans-serif";$('c-font-sans').classList.add('on');$('c-font-serif').classList.remove('on')};
+$('c-fminus').onclick=()=>{fontSize=Math.max(16,fontSize-2);pbody.style.fontSize=fontSize+'px';$('c-fsize').textContent=fontSize};
+$('c-fplus').onclick=()=>{fontSize=Math.min(60,fontSize+2);pbody.style.fontSize=fontSize+'px';$('c-fsize').textContent=fontSize};
+$('c-theme').onclick=function(){dark=!dark;screen.classList.toggle('dark',dark);this.textContent=dark?'☀️ 밝게':'🌙 어둡게'};
+$('c-guide').onclick=function(){$('guide-line').classList.toggle('show');this.classList.toggle('on')};
+$('c-full').onclick=()=>{const el=$('prompter-shell');document.fullscreenElement?document.exitFullscreen():el.requestFullscreen&&el.requestFullscreen()};
+
+/* --- 예시 --- */
+$('btn-sample').onclick=()=>{
+  $('f-title').value='하나님이 자라나게 하십니다';
+  $('f-church').value='살아나는교회';$('f-service').value='주일 오전 예배';
+  $('f-date').value='2026-10-18';$('f-preacher').value='신현성 목사';
+  $('f-verse').value='고린도전서 3:5-17';
+  $('manuscript').value='## 도입\n사랑하는 성도 여러분, 오늘 본문은 고린도전서 3장입니다.\n\n## 본론\n1. 심는 이와 물 주는 이\n바울은 말합니다. 심는 이나 물 주는 이는 아무것도 아니라고요.\n\n2. 자라나게 하시는 하나님\n오직 자라나게 하시는 이는 하나님뿐입니다.\n\n[적용]\n우리의 수고 너머에 일하시는 하나님을 신뢰합시다.\n\n## 결론\n하나님이 자라나게 하십니다. 아멘.';
+  render();
+};
+
+/* --- 원고 저장함 (localStorage) --- */
+const LSKEY='sermonPrompterSaved';
+function getSaved(){try{return JSON.parse(localStorage.getItem(LSKEY)||'{}')}catch(e){return{}}}
+function setSaved(o){localStorage.setItem(LSKEY,JSON.stringify(o))}
+function refreshSaved(){
+  const o=getSaved(),names=Object.keys(o);
+  $('saved-list').innerHTML=names.length?names.map(n=>
+    `<div class="item"><span>📄 ${esc(n)}</span><span><button data-load="${esc(n)}">불러오기</button><button data-del="${esc(n)}">삭제</button></span></div>`
+  ).join(''):'<div style="font-size:12px;color:#999">저장된 원고가 없습니다</div>';
+  $('saved-list').querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{
+    const d=o[b.dataset.load];if(!d)return;
+    $('f-title').value=d.title||'';$('f-church').value=d.church||'';$('f-service').value=d.service||'';
+    $('f-date').value=d.date||'';$('f-preacher').value=d.preacher||'';$('f-verse').value=d.verse||'';
+    $('manuscript').value=d.text||'';render();window.scrollTo({top:0,behavior:'smooth'});
+  });
+  $('saved-list').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    if(!confirm(`'${b.dataset.del}' 원고를 삭제할까요?`))return;
+    const o2=getSaved();delete o2[b.dataset.del];setSaved(o2);refreshSaved();
+  });
+}
+$('btn-save').onclick=()=>{
+  const n=$('save-name').value.trim();
+  if(!n){alert('저장 이름을 입력하세요.');return}
+  if(!$('manuscript').value.trim()){alert('저장할 원고가 없습니다.');return}
+  const o=getSaved();
+  o[n]={title:$('f-title').value,church:$('f-church').value,service:$('f-service').value,
+        date:$('f-date').value,preacher:$('f-preacher').value,verse:$('f-verse').value,
+        text:$('manuscript').value,savedAt:new Date().toISOString()};
+  setSaved(o);$('save-name').value='';refreshSaved();alert(`'${n}' 저장됐습니다.`);
+};
+
+/* --- 독립 실행 HTML 다운로드 --- */
+function buildStandalone(){
+  const title=$('f-title').value.trim(),church=$('f-church').value.trim(),
+        service=$('f-service').value.trim(),date=$('f-date').value,
+        preacher=$('f-preacher').value.trim(),verse=$('f-verse').value.trim();
+  const data=JSON.stringify({title,church,service,date,preacher,verse,sections,fontSize,dark});
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${esc(title)||'설교 프롬프터'}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Serif KR','Batang',바탕,serif;background:#0d0d0d;color:#f2ede0}
+#bar{position:fixed;top:0;left:0;right:0;background:#1c1c1c;padding:10px 12px;display:flex;gap:8px;align-items:center;z-index:10;flex-wrap:wrap}
+#bar button{background:#333;color:#fff;border:1px solid #555;border-radius:6px;padding:7px 13px;font-size:14px;cursor:pointer}
+#bar button.on{background:#c9a227;border-color:#c9a227;color:#111;font-weight:bold}
+#bar .sp{flex:1}#tm{color:#c9a227;font-weight:bold}
+#scr{padding:76px 36px 60px;max-height:100vh;overflow-y:auto}
+.p-meta{text-align:center;margin-bottom:26px}.p-church{font-size:15px;opacity:.7}
+.p-title{font-size:1.9em;font-weight:bold;margin:10px 0;color:#c9a227}
+.p-verse{display:inline-block;background:#222;border:1px solid #444;padding:4px 14px;border-radius:20px;font-size:15px;margin-top:6px}
+.p-sec{font-size:1.25em;font-weight:bold;margin:34px 0 12px;color:#c9a227;border-left:5px solid #c9a227;padding-left:12px}
+.p-para{margin:0 0 16px}#gl{position:sticky;top:50%;border-top:2px dashed rgba(200,60,60,.7);margin:0 -36px;display:none}
+#gl.show{display:block}</style></head><body>
+<div id="bar"><button id="pp">▶ 재생</button><button id="sl">느림</button><button id="md" class="on">보통</button><button id="fa">빠름</button><button id="tp">↑ 처음</button><span class="sp"></span><span id="tm">00:00</span><button id="fs">⛶ 전체화면</button></div>
+<div id="scr"><div id="gl"></div><div id="bd"></div></div>
+<script>
+const D=${data};
+const bd=document.getElementById('bd'),scr=document.getElementById('scr');
+bd.style.fontSize=D.fontSize+'px';
+let h='';
+if(D.title||D.church){h+='<div class="p-meta">';
+if(D.church||D.service||D.date)h+='<div class="p-church">'+[D.church,D.service,D.date].filter(Boolean).join(' · ')+'</div>';
+if(D.title)h+='<div class="p-title">'+D.title+'</div>';
+if(D.preacher)h+='<div class="p-church">'+D.preacher+'</div>';
+if(D.verse)h+='<div><span class="p-verse">📖 '+D.verse+'</span></div>';
+h+='</div>'}
+D.sections.forEach(s=>{if(s.title)h+='<div class="p-sec">'+s.title+'</div>';s.paras.forEach(p=>h+='<div class="p-para">'+p+'</div>')});
+bd.innerHTML=h||'<div style="text-align:center;opacity:.5;padding:80px 0">원고가 없습니다</div>';
+let playing=false,raf=null,speed=42,sec=0,tid=null,started=false;
+const pp=document.getElementById('pp');
+function tick(){if(!playing)return;scr.scrollTop+=speed/60;
+if(scr.scrollTop+scr.clientHeight>=scr.scrollHeight-2){playing=false;pp.textContent='▶ 재생';pp.classList.remove('on')}else raf=requestAnimationFrame(tick)}
+pp.onclick=()=>{playing=!playing;pp.textContent=playing?'⏸ 정지':'▶ 재생';pp.classList.toggle('on',playing);
+if(playing){if(!started){started=true;tid=setInterval(()=>{sec++;document.getElementById('tm').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')},1000)}raf=requestAnimationFrame(tick)}else cancelAnimationFrame(raf)};
+const lv=(id,v)=>{document.getElementById(id).onclick=()=>{speed=v;['sl','md','fa'].forEach(x=>document.getElementById(x).classList.remove('on'));document.getElementById(id).classList.add('on')}};
+lv('sl',22);lv('md',42);lv('fa',72);
+document.getElementById('tp').onclick=()=>{playing=false;pp.textContent='▶ 재생';pp.classList.remove('on');scr.scrollTo({top:0,behavior:'smooth'})};
+document.getElementById('fs').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()};
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();pp.click()}});
+<\/script></body></html>`;
+}
+$('btn-download').onclick=()=>{
+  const blob=new Blob([buildStandalone()],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=($('f-title').value.trim()||'설교프롬프터')+'.html';
+  a.click();URL.revokeObjectURL(a.href);
+};
+
+/* --- 초기화 --- */
+$('f-date').value=new Date().toISOString().slice(0,10);
+refreshSaved();render();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
