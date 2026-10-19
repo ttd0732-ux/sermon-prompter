@@ -78,6 +78,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <h1>✝ <span class="gold">설교 프롬프터</span></h1>
 <p>설교 원고를 강단용 텔레프롬프터로 바로 변환합니다 · 로그인과 서버 없이 이 브라우저 안에서만 동작합니다</p>
 <div class="contact">앱 문의) shs목사 · ttd0732@hanmail.net</div>
+<div style="margin-top:8px"><button class="btn btn-gold" id="btn-guide" style="margin:0">❓ 사용 설명서</button></div>
 </header>
 <main>
 <section class="panel" id="input-panel">
@@ -150,6 +151,49 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 </section>
 </main>
 <footer>앱 문의) shs목사 · ttd0732@hanmail.net</footer>
+<div id="guide-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;overflow-y:auto">
+<div style="max-width:640px;margin:40px auto;background:#fff;border-radius:12px;padding:28px;position:relative">
+<button id="guide-close" style="position:absolute;top:12px;right:14px;font-size:22px;background:none;border:none;cursor:pointer">✕</button>
+<h2 style="font-size:20px;margin-bottom:16px;color:#1e3a5f">📖 설교 프롬프터 사용 설명서</h2>
+<div style="font-size:14px;line-height:1.9">
+<h3 style="margin:14px 0 6px;color:#1e3a5f">1. 원고 입력하기</h3>
+<p>① 설교 제목, 교회명, 예배 구분, 일자, 설교자, 본문 구절을 입력합니다.<br>
+② <b>설교 원고 전체</b> 칸에 원고를 붙여넣습니다.<br>
+③ 소제목은 자동으로 인식됩니다. 인식 규칙:<br>
+&nbsp;&nbsp;· <b>##</b> 로 시작하는 줄 (예: ## 도입)<br>
+&nbsp;&nbsp;· <b>[대괄호]</b> 로 감싼 줄 (예: [적용])<br>
+&nbsp;&nbsp;· 도입/서론/본론/결론/적용/마무리 로 시작하는 짧은 줄<br>
+&nbsp;&nbsp;· <b>1.</b> <b>2.</b> 로 시작하는 짧은 줄</p>
+<h3 style="margin:14px 0 6px;color:#1e3a5f">2. 미리보기로 확인하기</h3>
+<p>원고를 입력하면 오른쪽에 프롬프터 화면이 바로 표시됩니다.<br>
+<b>▶ 재생</b>을 누르면 원고가 자동으로 위로 스크롤됩니다.<br>
+· <b>느림/보통/빠름</b>: 스크롤 속도 3단계<br>
+· <b>− / ＋</b>: 속도 미세 조절<br>
+· <b>↑ 처음</b>: 맨 위로 이동<br>
+· <b>⏱ 타이머</b>: 목표 설교 시간을 정하면 경과 시간을 알려줍니다.</p>
+<h3 style="margin:14px 0 6px;color:#1e3a5f">3. 낭독 기능</h3>
+<p><b>▶ 전체 읽기</b>를 누르면 원고를 음성으로 읽어줍니다.<br>
+각 섹션 제목 옆의 <b>▶ 읽기</b> 버튼으로 부분별로 들을 수 있습니다.<br>
+<b>1.0×/1.25×/1.5×</b>로 읽기 속도를 조절할 수 있습니다.</p>
+<h3 style="margin:14px 0 6px;color:#1e3a5f">4. 화면 꾸미기</h3>
+<p>· <b>바탕/고딕</b>: 글꼴 변경<br>
+· <b>가−/가＋</b>: 글자 크기 조절<br>
+· <b>🌙 어둡게</b>: 강단에 어울리는 다크 모드<br>
+· <b>읽는 줄</b>: 화면 중앙에 읽는 위치 표시선<br>
+· <b>⛶ 전체화면</b>: 프롬프터만 크게 보기</p>
+<h3 style="margin:14px 0 6px;color:#1e3a5f">5. 원고 저장함</h3>
+<p><b>저장 이름</b>을 입력하고 <b>저장</b>을 누르면 원고가 이 브라우저에 저장됩니다.<br>
+나중에 <b>불러오기</b>로 다시 꺼내 쓸 수 있습니다.</p>
+<h3 style="margin:14px 0 6px;color:#1e3a5f">6. 강단에서 사용하기</h3>
+<p>① <b>⬇ 프롬프터 HTML 다운로드</b> 버튼을 눌러 파일을 저장합니다.<br>
+② 강단 컴퓨터나 태블릿에서 그 파일을 열기만 하면 됩니다.<br>
+③ 다운로드한 파일에서도 자동 스크롤과 타이머가 동작합니다.</p>
+<h3 style="margin:14px 0 6px;color:#1e3a5f">7. 단축키</h3>
+<p><b>Space</b> 재생/정지 · <b>←</b><b>→</b> 속도 조절 · <b>Home</b> 처음으로</p>
+<p style="margin-top:14px;color:#777">원고는 어디로도 전송되지 않고 이 브라우저 안에서만 처리됩니다.</p>
+</div>
+</div>
+</div>
 <script>
 /* ===== 설교 프롬프터 ===== */
 const $=id=>document.getElementById(id);
@@ -388,6 +432,9 @@ $('btn-download').onclick=()=>{
 
 /* --- 초기화 --- */
 $('f-date').value=new Date().toISOString().slice(0,10);
+$('btn-guide').onclick=()=>{$('guide-modal').style.display='block'};
+$('guide-close').onclick=()=>{$('guide-modal').style.display='none'};
+$('guide-modal').onclick=e=>{if(e.target.id==='guide-modal')$('guide-modal').style.display='none'};
 refreshSaved();render();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
