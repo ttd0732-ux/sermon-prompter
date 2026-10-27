@@ -452,7 +452,7 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch((
 </div>
 <script>
 (function(){
-  var KEY = 'pastor-app-lock-prompter';
+  var KEY = 'pastor-app-lock-prompter-v2';
   try { if (localStorage.getItem(KEY) === '1') { var old = document.getElementById('pastor-app-lock'); if (old) old.remove(); return; } } catch(e) {}
   document.body.style.overflow = 'hidden';
   var form = document.getElementById('pastor-app-lock-form');
