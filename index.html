@@ -467,7 +467,7 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch((
     if (!window.crypto || !crypto.subtle) { err.style.display = 'block'; err.textContent = '보안 연결(https)에서만 열 수 있습니다.'; return; }
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(val)).then(function(buf){
       var h = hex(buf);
-      if (h === 'bec9840d05478fabb60a9b95965686b1b17c6261bc2d458c1138f381326391d4' || h === 'b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9') {
+      if (h === 'bec9840d05478fabb60a9b95965686b1b17c6261bc2d458c1138f381326391d4' || h === '480f5a496560ae4228bb7977ecf29b2c589d7a7aa6b609534566af8cbc229a9e') {
         try { localStorage.setItem(KEY, '1'); } catch(e) {}
         document.body.style.overflow = '';
         var el = document.getElementById('pastor-app-lock'); if (el) el.remove();
