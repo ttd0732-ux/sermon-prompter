@@ -439,12 +439,12 @@ refreshSaved();render();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 
-<div id="pastor-app-lock" style="position:fixed;inset:0;z-index:999999;background:#16283f;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Malgun Gothic',sans-serif">
-  <form id="pastor-app-lock-form" style="background:#fff;border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center;color:#1e3a5f">
+<div id="pastor-app-lock" style="position:fixed;inset:0;z-index:999999;background:#16283f;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Malgun Gothic',sans-serif">
+  <form id="pastor-app-lock-form" style="background:#fff;border-radius:18px;padding:24px 16px;max-width:420px;width:100%;text-align:center;color:#1e3a5f">
     <div style="font-size:40px">🔒</div>
     <h2 style="font-size:22px;margin:10px 0 6px">설교프롬프터</h2>
     <p style="font-size:14px;color:#4a5a70;line-height:1.6">이 앱은 비번이 필요합니다.<br>운영자 키 또는 이 앱의 비번을 입력하세요.</p>
-    <p style="font-size:17px;color:#c0392b;font-weight:900;margin-top:14px;background:#fff3cd;border:2px solid #f0b429;border-radius:12px;padding:12px 10px">앱비번문의는 shs운영자에게 문의하세요</p>
+    <p style="font-size:clamp(13px,4vw,15px);color:#c0392b;font-weight:900;margin-top:14px;background:#fff3cd;border:2px solid #f0b429;border-radius:12px;padding:12px 6px;white-space:nowrap;text-align:center">앱비번문의는 shs운영자에게 문의하세요</p>
     <input id="pastor-app-lock-input" type="password" inputmode="numeric" autocomplete="off" placeholder="비번 입력" style="width:100%;padding:14px;border:2px solid #d9d2bf;border-radius:12px;font-size:18px;text-align:center;margin:16px 0 10px;box-sizing:border-box">
     <button type="submit" style="width:100%;padding:14px;background:#1e3a5f;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer">앱 열기</button>
     <p id="pastor-app-lock-error" style="display:none;color:#c0392b;font-size:14px;margin-top:12px">비번이 맞지 않습니다. 다시 입력해 주세요.</p>
