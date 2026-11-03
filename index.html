@@ -113,7 +113,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 </div>
 <h2 style="margin-top:18px">💾 원고 저장함</h2>
 <div class="row2">
-<div><input type="text" id="save-name" placeholder="저장 이름 (비워두면 제목+본문구절+일자로 자동 저장)"></div>
+<div><input type="text" id="save-name" placeholder="저장 이름 (비워두면 제목+일자로 자동 저장)"></div>
 <div style="flex:0 0 auto"><button class="btn btn-gold" id="btn-save" style="margin:0">저장</button></div>
 </div>
 <div class="row2">
@@ -201,7 +201,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 · <b>읽는 줄</b>: 화면 중앙에 읽는 위치 표시선<br>
 · <b>⛶ 전체화면</b>: 프롬프터만 크게 보기</p>
 <h3 style="margin:14px 0 6px;color:#1e3a5f">5. 원고 저장함</h3>
-<p><b>저장 이름</b>을 입력하고 <b>분류</b>를 고른 뒤 <b>저장</b>을 누르면 원고가 이 브라우저에 저장됩니다. 이름을 비워두면 제목·본문구절·일자 순서로 자동 저장됩니다. <b>저장 목록 보기</b>에서 분류별로 볼 수 있습니다.<br>
+<p><b>저장 이름</b>을 입력하고 <b>분류</b>를 고른 뒤 <b>저장</b>을 누르면 원고가 이 브라우저에 저장됩니다. 이름을 비워두면 제목·일자 순서로 자동 저장됩니다. <b>저장 목록 보기</b>에서 분류별로 볼 수 있습니다.<br>
 나중에 <b>불러오기</b>로 다시 꺼내 쓸 수 있습니다.</p>
 <h3 style="margin:14px 0 6px;color:#1e3a5f">6. 강단에서 사용하기</h3>
 <p>① <b>⬇ 프롬프터 HTML 다운로드</b> 버튼을 눌러 파일을 저장합니다.<br>
@@ -583,9 +583,14 @@ $('btn-save').onclick=()=>{
   const o=getSaved();
   let n=$('save-name').value.trim();
   if(!n){
-    const t=$('f-title').value.trim(), v=$('f-verse').value.trim(), dt=$('f-date').value;
-    const parts=[t, v, dt].filter(Boolean);
-    n=parts.length?parts.join(' '):'설교 '+(new Date().toISOString().slice(0,10));
+    const t=$('f-title').value.trim();
+    let dt=$('f-date').value;
+    if(!dt) dt=localToday();
+    if(t){
+      n=t+' '+dt;
+    } else {
+      n='설교 '+dt;
+    }
     if(o[n]){ let k=2; while(o[n+' ('+k+')']) k++; n=n+' ('+k+')'; }
   }
   var cat=$('save-category').value;
@@ -654,7 +659,8 @@ $('btn-download').onclick=()=>{
 };
 
 /* --- 초기화 --- */
-$('f-date').value=new Date().toISOString().slice(0,10);
+function localToday(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+$('f-date').value=localToday();
 $('btn-guide').onclick=()=>{$('guide-modal').style.display='block'};
 $('guide-close').onclick=()=>{$('guide-modal').style.display='none'};
 $('guide-modal').onclick=e=>{if(e.target.id==='guide-modal')$('guide-modal').style.display='none'};
