@@ -135,6 +135,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 </section>
 <section class="panel" id="preview-panel">
 <h2>🖥 미리보기</h2>
+<div id="practice-box" style="background:#e8eef7;border:2px solid #1e3a5f;border-radius:10px;padding:12px;margin-bottom:10px;font-size:14px"><b>📋 연습 기록</b><span id="practice-summary" style="margin-left:6px">아직 연습 기록이 없습니다.</span><div id="practice-history" style="margin-top:6px;font-size:13px;color:#333"></div></div>
 <div id="prompter-shell">
 <div id="ctrl">
 <span style="font-weight:700;color:var(--gold)">설교교안 롤링 (내가 직접 읽으며 연습하기)</span>
@@ -170,6 +171,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <span style="color:#aaa">고른 목소리로 읽어줍니다</span>
 </div>
 <div id="toc"></div>
+<div id="progress-row" style="display:flex;align-items:center;gap:8px;padding:8px 4px"><div style="flex:1;height:10px;background:#333;border-radius:5px;overflow:hidden"><div id="progress-fill" style="height:100%;width:0%;background:#f0b429"></div></div><span id="progress-pct" style="font-weight:700;color:#f0b429;min-width:72px;text-align:right">진행 0%</span></div>
 <div id="screen"><div id="guide-line"></div><div id="p-body" style="font-size:30px"></div></div>
 </div>
 <div style="font-size:14px;line-height:1.7;color:#1e3a5f;background:#fff8e1;border:2px solid #f0b429;border-radius:10px;padding:12px;margin-top:10px"><b>🔊 설교교안 AI 읽어주기 안내</b><br>숫자와 기호는 읽어주지 않습니다. 성경장절은 한자음(이십오장)으로 읽습니다.<br>목소리는 마리아·다윗·바울 중에서 고릅니다.</div>
@@ -573,6 +575,7 @@ function refreshSaved(){
     if(d.category) meta+=` <span style="background:#f0b429;color:#1e3a5f;font-weight:700;padding:1px 7px;border-radius:10px;font-size:12px;margin-right:6px">${esc(d.category)}</span>`;
     if(d.verse) meta+=` <span style="color:#666;font-size:12px">· ${esc(d.verse)}</span>`;
     if(d.date) meta+=` <span style="color:#666;font-size:12px">· ${esc(d.date)}</span>`;
+    if(typeof getPracticeLog==='function'&&typeof practiceKeyFor==='function'){const pk=practiceKeyFor(d.title||'',d.date||'');const pl=getPracticeLog()[pk];if(pl&&pl.sessions&&pl.sessions.length)meta+=` <span style="color:#1e3a5f;font-size:12px;font-weight:700">· 연습 ${pl.sessions.length}번</span>`;}
     return `<div class="item"><span style="flex:1;min-width:0">📄 ${meta}${esc(n)}</span><span style="flex:0 0 auto"><button data-load="${esc(n)}">불러오기</button><button data-del="${esc(n)}">삭제</button></span></div>`;
   }).join(''):(f?'<div style="font-size:12px;color:#999">해당 분류에 저장된 원고가 없습니다</div>':'<div style="font-size:12px;color:#999">저장된 원고가 없습니다</div>');
   if(fEl && !fEl.onchange) fEl.onchange=refreshSaved;
@@ -581,7 +584,7 @@ function refreshSaved(){
     $('f-title').value=d.title||'';
     $('f-date').value=d.date||'';$('f-verse').value=d.verse||'';
     $('save-category').value=d.category||'';
-    $('manuscript').value=d.text||'';render();window.scrollTo({top:0,behavior:'smooth'});
+    $('manuscript').value=d.text||'';render();if(typeof updateProgress==='function')updateProgress();if(typeof refreshPracticeDisplay==='function')refreshPracticeDisplay();window.scrollTo({top:0,behavior:'smooth'});
   });
   $('saved-list').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
     if(!confirm(`'${b.dataset.del}' 원고를 삭제할까요?`))return;
@@ -770,7 +773,7 @@ function showDraftBanner(){
   const loadBtn=$('draft-load');if(loadBtn)loadBtn.onclick=function(){
     try{
       const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');if(!d||!d.text)return;
-      $('f-title').value=d.title||'';$('f-verse').value=d.verse||'';$('f-date').value=d.date||'';$('save-category').value=d.category||'';$('manuscript').value=d.text;render();
+      $('f-title').value=d.title||'';$('f-verse').value=d.verse||'';$('f-date').value=d.date||'';$('save-category').value=d.category||'';$('manuscript').value=d.text;render();if(typeof updateProgress==='function')updateProgress();if(typeof refreshPracticeDisplay==='function')refreshPracticeDisplay();
     }catch(e){}
     const b=$('draft-banner');if(b)b.style.display='none';
   };
@@ -815,6 +818,119 @@ function setBackupStatus(msg){
     r.readAsText(f);im.value='';
   });
 })();
+</script>
+<script>
+/* --- 진행 % + 연습 기록 --- */
+function updateProgress(){
+  try{
+    const fill=$('progress-fill'),txt=$('progress-pct');
+    if(!fill||!txt)return;
+    const m=$('manuscript').value;
+    if(!m.trim()){fill.style.width='0%';txt.textContent='진행 0%';return;}
+    const max=screen.scrollHeight-screen.clientHeight;
+    let pct=100;
+    if(max>0){pct=Math.round(screen.scrollTop/max*100);if(pct<0)pct=0;if(pct>100)pct=100;}
+    fill.style.width=pct+'%';txt.textContent='진행 '+pct+'%';
+  }catch(e){}
+}
+if(typeof screen!=='undefined'&&screen&&screen.addEventListener){screen.addEventListener('scroll',updateProgress);}
+window.addEventListener('resize',updateProgress);
+['c-fminus','c-fplus'].forEach(function(id){var el=$(id);if(el)el.addEventListener('click',function(){updateProgress();});});
+const PRACTICE_KEY='sermonPrompterPractice';
+function getPracticeLog(){try{return JSON.parse(localStorage.getItem(PRACTICE_KEY)||'{}')}catch(e){return{}}}
+function setPracticeLog(o){localStorage.setItem(PRACTICE_KEY,JSON.stringify(o))}
+function practiceKeyFor(title,date){
+  const t=(title||'').trim();let dt=(date||'').trim();if(!dt)dt=localToday();
+  if(t)return t+' '+dt;return '설교 '+dt;
+}
+function practiceKey(){return practiceKeyFor($('f-title').value,$('f-date').value);}
+function fmtDur(sec){
+  sec=Math.round(sec);
+  if(sec<60)return sec+'초';
+  return Math.floor(sec/60)+'분';
+}
+function pad2(n){return String(n).padStart(2,'0');}
+function fmtDT(iso){
+  try{
+    const d=new Date(iso);
+    return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+' '+pad2(d.getHours())+':'+pad2(d.getMinutes());
+  }catch(e){return '';}
+}
+function fmtD(iso){
+  try{
+    const d=new Date(iso);
+    return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  }catch(e){return '';}
+}
+function refreshPracticeDisplay(){
+  try{
+    const sum=$('practice-summary'),hist=$('practice-history');
+    if(!sum)return;
+    const log=getPracticeLog()[practiceKey()];
+    if(!log||!log.sessions||!log.sessions.length){sum.textContent='아직 연습 기록이 없습니다.';if(hist)hist.innerHTML='';return;}
+    const ss=log.sessions,last=ss[ss.length-1];
+    sum.textContent='연습 '+ss.length+'번 · 마지막 '+fmtDur(last.durationSec)+' ('+fmtD(last.at)+')';
+    if(hist){
+      const rows=ss.slice(-10).reverse().map(function(s){return fmtDT(s.at)+' · '+(s.mode==='rolling'?'롤링':'읽기')+' '+fmtDur(s.durationSec);});
+      hist.innerHTML=rows.join('<br>');
+    }
+  }catch(e){}
+}
+var practiceStart=null,practiceMode=null;
+function startPractice(mode){
+  try{endPractice(null);}catch(e){}
+  practiceStart=Date.now();practiceMode=mode;
+}
+function endPractice(expectedMode){
+  try{
+    if(practiceStart===null)return;
+    if(expectedMode&&practiceMode!==expectedMode)return;
+    const durSec=Math.round((Date.now()-practiceStart)/1000);
+    const mode=practiceMode;
+    practiceStart=null;practiceMode=null;
+    if(durSec<30)return;
+    const key=practiceKey();
+    const log=getPracticeLog();
+    if(!log[key])log[key]={sessions:[]};
+    log[key].sessions.push({at:new Date().toISOString(),durationSec:durSec,mode:mode});
+    if(log[key].sessions.length>50)log[key].sessions=log[key].sessions.slice(-50);
+    setPracticeLog(log);
+    refreshPracticeDisplay();
+    if(typeof refreshSaved==='function')refreshSaved();
+  }catch(e){}
+}
+if(typeof play==='function'){
+  const origPlay=play;
+  play=function(){const wasPlaying=playing;origPlay.apply(this,arguments);if(!wasPlaying&&playing)startPractice('rolling');};
+}
+if(typeof stop==='function'){
+  const origStop=stop;
+  stop=function(){origStop.apply(this,arguments);endPractice('rolling');};
+}
+if(typeof stopNarration==='function'){
+  const origStopNarr=stopNarration;
+  stopNarration=function(){origStopNarr.apply(this,arguments);endPractice('reading');};
+}
+if(typeof startNarration==='function'){
+  const origStartNarr=startNarration;
+  startNarration=function(){origStartNarr.apply(this,arguments);if(narrationOn)startPractice('reading');};
+}
+if(typeof readSection==='function'){
+  const origReadSec=readSection;
+  readSection=function(){origReadSec.apply(this,arguments);if(narrationOn)startPractice('reading');};
+}
+setInterval(function(){
+  try{
+    if(practiceStart!==null){
+      if(practiceMode==='reading'&&!narrationOn)endPractice('reading');
+      else if(practiceMode==='rolling'&&!playing)endPractice('rolling');
+    }
+  }catch(e){}
+},5000);
+['f-title','f-verse','f-date','manuscript'].forEach(function(id){var el=$(id);if(!el)return;el.addEventListener('input',function(){updateProgress();refreshPracticeDisplay();});el.addEventListener('change',function(){updateProgress();refreshPracticeDisplay();});});
+updateProgress();
+refreshPracticeDisplay();
+if(typeof refreshSaved==='function')refreshSaved();
 </script>
 <div id="pastor-app-lock" style="position:fixed;inset:0;z-index:999999;background:#16283f;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Malgun Gothic',sans-serif">
   <form id="pastor-app-lock-form" style="background:#fff;border-radius:18px;padding:24px 16px;max-width:420px;width:100%;text-align:center;color:#1e3a5f">
