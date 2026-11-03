@@ -118,7 +118,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 </div>
 <h2 style="margin-top:18px">💾 원고 저장함</h2>
 <div class="row2">
-<div><input type="text" id="save-name" placeholder="저장 이름 (예: 10-19 주일설교)"></div>
+<div><input type="text" id="save-name" placeholder="저장 이름 (비워두면 본문구절+제목으로 자동 저장)"></div>
 <div style="flex:0 0 auto"><button class="btn btn-gold" id="btn-save" style="margin:0">저장</button></div>
 </div>
 <div id="saved-list"></div>
@@ -147,8 +147,6 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <button id="c-rate-mid" class="on">보통</button>
 <button id="c-rate-fast">빠름</button>
 <button id="c-rate-minus">−</button><span id="c-rate-display" style="min-width:40px;text-align:center">1.0×</span><button id="c-rate-plus">＋</button>
-<span>목소리</span>
-<select id="c-voice"><option>음성 불러오는 중…</option></select>
 <span class="sp"></span>
 <button id="c-font-serif" class="on">바탕</button>
 <button id="c-font-sans">고딕</button>
@@ -157,10 +155,15 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <button id="c-guide">읽는 줄</button>
 <button id="c-full">⛶ 전체화면</button>
 </div>
+<div id="ctrl" style="border-top:1px solid #333">
+<span style="font-weight:700;color:var(--gold)">목소리 선택</span>
+<select id="c-voice"><option>음성 불러오는 중…</option></select>
+<span style="color:#aaa">고른 목소리로 읽어줍니다</span>
+</div>
 <div id="toc"></div>
 <div id="screen"><div id="guide-line"></div><div id="p-body" style="font-size:30px"></div></div>
 </div>
-<div class="hint">설교교안 AI 읽어주기 안내: 숫자와 기호는 읽어주지 않습니다. 성경장절은 읽습니다. · 목소리는 위 "목소리"에서 고른 목소리로 읽어줍니다. (목소리 목록은 핸드폰에 설치된 한국어 음성만큼만 나옵니다.)</div>
+<div class="hint">설교교안 AI 읽어주기 안내: 숫자와 기호는 읽어주지 않습니다. 성경장절은 읽습니다. · 목소리는 "목소리 선택"에서 고른 목소리로 읽어줍니다. (목소리 목록은 핸드폰에 설치된 한국어 음성만큼만 나옵니다.)</div>
 <div class="hint" id="eta-hint" style="margin-top:10px">원고를 입력하면 예상 설교 시간이 표시됩니다. (분당 약 350자 기준)</div>
 </section>
 </main>
@@ -189,7 +192,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <p><b>▶ 전체 읽기</b>를 누르면 원고를 음성으로 읽어줍니다.<br>
 각 섹션 제목 옆의 <b>▶ 읽기</b> 버튼으로 부분별로 들을 수 있습니다.<br>
 <b>설교교안 AI 읽어주기</b>의 <b>느림/보통/빠름</b>과 <b>−/＋</b>으로 읽기 속도를 조절할 수 있습니다.<br>
-<b>목소리</b>에서 원하는 목소리를 고르면 그 목소리로 읽어줍니다. (목소리 목록은 핸드폰에 설치된 한국어 음성만큼만 나옵니다.)<br>낭독할 때는 기호와 숫자는 읽지 않고 글자만 읽습니다. 단, 성경 장절(예: 마태복음 25장 1절) 숫자는 읽습니다. (화면에 보이는 원고는 그대로입니다.)<br><b>▶ 전체 읽기</b>를 누르면 읽는 부분으로 화면이 따라가며, 읽는 속도가 곧 화면 속도입니다. <b>▶ 재생</b>(롤링)만 누르면 설정한 속도로 소리 없이 흘러갑니다. 둘을 같이 누르면 읽기가 우선합니다.</p>
+<b>목소리 선택</b>에서 원하는 목소리를 고르면 그 목소리로 읽어줍니다. (목소리 목록은 핸드폰에 설치된 한국어 음성만큼만 나옵니다.)<br>낭독할 때는 기호와 숫자는 읽지 않고 글자만 읽습니다. 단, 성경 장절(예: 마태복음 25장 1절) 숫자는 읽습니다. (화면에 보이는 원고는 그대로입니다.)<br><b>▶ 전체 읽기</b>를 누르면 읽는 부분으로 화면이 따라가며, 읽는 속도가 곧 화면 속도입니다. <b>▶ 재생</b>(롤링)만 누르면 설정한 속도로 소리 없이 흘러갑니다. 둘을 같이 누르면 읽기가 우선합니다.</p>
 <h3 style="margin:14px 0 6px;color:#1e3a5f">4. 화면 꾸미기</h3>
 <p>· <b>바탕/고딕</b>: 글꼴 변경<br>
 · <b>가−/가＋</b>: 글자 크기 조절<br>
@@ -288,7 +291,7 @@ function tick(){
 function play(){if(playing)return;stopNarration();playing=true;$('c-play').textContent='⏸ 정지';$('c-play').classList.add('on');rafId=requestAnimationFrame(tick)}
 function stop(){playing=false;cancelAnimationFrame(rafId);$('c-play').textContent='▶ 재생';$('c-play').classList.remove('on')}
 $('c-play').onclick=()=>playing?stop():play();
-function setLevel(l,v){speedLevel=l;speed=v;$('c-speed').textContent=v;['c-slow','c-mid','c-fast'].forEach(id=>$(id).classList.remove('on'));$('c-'+l).classList.add('on')}
+function setLevel(l,v){speedLevel=l;speed=v;$('c-speed').textContent=v;['c-slow','c-mid','c-fast'].forEach(id=>$(id).classList.remove('on'));$('c-'+l).classList.add('on');if(!playing && !narrationOn)play();}
 $('c-slow').onclick=()=>setLevel('slow',22);
 $('c-mid').onclick=()=>setLevel('mid',42);
 $('c-fast').onclick=()=>setLevel('fast',72);
@@ -355,7 +358,7 @@ function fullText(){
   return t;
 }
 /* --- 낭독·롤링 동기화: 낭독이 화면을 이끈다 --- */
-let narrationOn=false, narratingEl=null;
+let narrationOn=false, narratingEl=null, narrationIdx=0, narrationGen=0, lastSingleSection=-1;
 function clearNarrating(){ if(narratingEl) narratingEl.classList.remove('narrating'); narratingEl=null; }
 function stopNarration(){ narrationOn=false; clearNarrating(); if('speechSynthesis'in window) speechSynthesis.cancel(); }
 function scrollToSection(i){
@@ -366,6 +369,7 @@ function scrollToSection(i){
 function speakSectionAt(i){
   if(!narrationOn) return;
   if(i>=sections.length){ narrationOn=false; clearNarrating(); return; }
+  narrationIdx=i;
   var s=sections[i];
   var t=(s.title?s.title+'. ':'')+s.paras.join(' ');
   if(!cleanSpeechText(t)){ speakSectionAt(i+1); return; }
@@ -376,19 +380,27 @@ function speakSectionAt(i){
   var u=new SpeechSynthesisUtterance(cleanSpeechText(t));
   var vi=+$('c-voice').value; if(voices[vi]) u.voice=voices[vi];
   u.lang='ko-KR'; u.rate=ttsRate;
-  u.onend=function(){ if(narrationOn) speakSectionAt(i+1); };
-  u.onerror=function(){ if(narrationOn) speakSectionAt(i+1); };
+  var myGen=narrationGen;
+  u.onend=function(){ if(narrationOn && myGen===narrationGen) speakSectionAt(i+1); };
+  u.onerror=function(){ if(narrationOn && myGen===narrationGen) speakSectionAt(i+1); };
   speechSynthesis.speak(u);
+}
+function restartNarrationAtCurrent(){
+  if(!narrationOn) return;
+  narrationGen++;
+  if('speechSynthesis'in window) speechSynthesis.cancel();
+  speakSectionAt(narrationIdx);
 }
 function startNarration(fromIdx){
   if(!sections.length){ var tt=$('f-title').value.trim(); if(tt){ stop(); speak(tt); } else alert('읽을 원고가 없습니다.'); return; }
   stop();
   narrationOn=true;
+  narrationGen++;
   speakSectionAt(fromIdx||0);
 }
 $('c-read-all').onclick=()=>{ stopNarration(); startNarration(0); };
 $('c-read-stop').onclick=()=>stopNarration();
-function readSection(i){const s=sections[i];if(!s)return; stop(); stopNarration(); scrollToSection(i); speak((s.title?s.title+'. ':'')+s.paras.join(' '))}
+function readSection(i){const s=sections[i];if(!s)return; lastSingleSection=i; stop(); stopNarration(); scrollToSection(i); speak((s.title?s.title+'. ':'')+s.paras.join(' '))}
 
 /* --- AI 읽어주기 속도 (느림/보통/빠름 + 미세조절) --- */
 let ttsRate=1.0;
@@ -397,6 +409,8 @@ function setTtsRate(v, preset){
   ttsRate=Math.min(2, Math.max(0.5, Math.round(v*100)/100));
   var d=$('c-rate-display'); if(d) d.textContent=fmtRate(ttsRate);
   if(preset){ ['c-rate-slow','c-rate-mid','c-rate-fast'].forEach(function(id){ $(id).classList.remove('on'); }); $('c-rate-'+preset).classList.add('on'); }
+  if(narrationOn){ restartNarrationAtCurrent(); }
+  else if('speechSynthesis'in window && (speechSynthesis.speaking || speechSynthesis.pending) && lastSingleSection>=0){ readSection(lastSingleSection); }
 }
 $('c-rate-slow').onclick=function(){ setTtsRate(0.8,'slow'); };
 $('c-rate-mid').onclick=function(){ setTtsRate(1.0,'mid'); };
@@ -429,9 +443,14 @@ function getSaved(){try{return JSON.parse(localStorage.getItem(LSKEY)||'{}')}cat
 function setSaved(o){localStorage.setItem(LSKEY,JSON.stringify(o))}
 function refreshSaved(){
   const o=getSaved(),names=Object.keys(o);
-  $('saved-list').innerHTML=names.length?names.map(n=>
-    `<div class="item"><span>📄 ${esc(n)}</span><span><button data-load="${esc(n)}">불러오기</button><button data-del="${esc(n)}">삭제</button></span></div>`
-  ).join(''):'<div style="font-size:12px;color:#999">저장된 원고가 없습니다</div>';
+  $('saved-list').innerHTML=names.length?names.map(n=>{
+    const d=o[n]||{};
+    let meta='';
+    if(d.verse) meta+=` <span style="color:#666;font-size:12px">· ${esc(d.verse)}</span>`;
+    if(d.preacher) meta+=` <span style="color:#666;font-size:12px">· ${esc(d.preacher)}</span>`;
+    if(d.date) meta+=` <span style="color:#666;font-size:12px">· ${esc(d.date)}</span>`;
+    return `<div class="item"><span style="flex:1;min-width:0">📄 ${esc(n)}${meta}</span><span style="flex:0 0 auto"><button data-load="${esc(n)}">불러오기</button><button data-del="${esc(n)}">삭제</button></span></div>`;
+  }).join(''):'<div style="font-size:12px;color:#999">저장된 원고가 없습니다</div>';
   $('saved-list').querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{
     const d=o[b.dataset.load];if(!d)return;
     $('f-title').value=d.title||'';$('f-church').value=d.church||'';$('f-service').value=d.service||'';
@@ -444,10 +463,14 @@ function refreshSaved(){
   });
 }
 $('btn-save').onclick=()=>{
-  const n=$('save-name').value.trim();
-  if(!n){alert('저장 이름을 입력하세요.');return}
   if(!$('manuscript').value.trim()){alert('저장할 원고가 없습니다.');return}
   const o=getSaved();
+  let n=$('save-name').value.trim();
+  if(!n){
+    const v=$('f-verse').value.trim(), t=$('f-title').value.trim();
+    if(v && t) n=v+' '+t; else if(v) n=v; else if(t) n=t; else n='설교 '+(new Date().toISOString().slice(0,10));
+    if(o[n]){ let k=2; while(o[n+' ('+k+')']) k++; n=n+' ('+k+')'; }
+  }
   o[n]={title:$('f-title').value,church:$('f-church').value,service:$('f-service').value,
         date:$('f-date').value,preacher:$('f-preacher').value,verse:$('f-verse').value,
         text:$('manuscript').value,savedAt:new Date().toISOString()};
