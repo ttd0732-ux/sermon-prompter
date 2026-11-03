@@ -84,6 +84,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <main>
 <section class="panel" id="input-panel">
 <h2>📝 원고 입력</h2>
+<p class="hint">이 앱은 설교를 다 쓰신 뒤, 완성된 원고를 읽고 연습하는 용도입니다. 완성된 원고를 여기에 붙여넣어 연습하세요.</p>
 <div class="row2">
 <div><label>설교 제목</label><input type="text" id="f-title" placeholder="예: 믿음으로 얻는 칭의"></div>
 </div>
@@ -92,6 +93,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <div><label>설교 일자</label><input type="date" id="f-date"></div>
 </div>
 <label>설교 원고 전체</label>
+<div id="draft-banner" style="display:none;background:#fff8e1;border:2px solid #f0b429;border-radius:10px;padding:10px;margin-bottom:10px;font-size:14px">이전에 쓰던 원고가 임시 저장되어 있습니다. <span id="draft-info"></span> <button class="btn btn-gold" id="draft-load" type="button">불러오기</button> <button class="btn btn-gray" id="draft-discard" type="button">지우기</button></div>
 <textarea id="manuscript" placeholder="여기에 설교 원고를 붙여넣으세요."></textarea>
 <div style="margin-top:10px">
   <label for="manuscript-file">원고 파일 불러오기 (PDF·텍스트·워드)</label>
@@ -123,6 +125,12 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <div><label>저장 목록 보기</label><select id="saved-filter"><option value="">전체</option><option value="주일설교">주일설교</option><option value="주일오후 설교">주일오후 설교</option><option value="수요설교">수요설교</option><option value="금요설교">금요설교</option><option value="새벽설교">새벽설교</option><option value="특강설교">특강설교</option><option value="기타설교">기타설교</option><option value="아동부설교">아동부설교</option><option value="중고등설교">중고등설교</option><option value="청년부설교">청년부설교</option></select></div>
 </div>
 <div id="saved-list"></div>
+<div style="margin-top:12px">
+<div style="font-weight:700;margin-bottom:6px">저장 목록 백업</div>
+<button class="btn btn-gold" id="btn-export" type="button">저장 목록 내보내기 (파일로 저장)</button>
+<div style="margin-top:8px"><label for="import-file">저장 목록 가져오기</label> <input type="file" id="import-file" accept=".json"></div>
+<p class="hint" id="backup-status" style="display:none"></p>
+</div>
 <div class="hint">단축키: <kbd>Space</kbd> 재생/정지 · <kbd>←</kbd><kbd>→</kbd> 속도 조절 · <kbd>Home</kbd> 처음으로</div>
 </section>
 <section class="panel" id="preview-panel">
@@ -174,6 +182,7 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 <button id="guide-close" style="position:absolute;top:12px;right:14px;font-size:22px;background:none;border:none;cursor:pointer">✕</button>
 <h2 style="font-size:20px;margin-bottom:16px;color:#1e3a5f">📖 설교 프롬프터 사용 설명서</h2>
 <div style="font-size:14px;line-height:1.9">
+<p>이 앱은 설교를 다 쓰신 뒤, 완성된 원고를 읽고 연습하는 용도입니다.</p>
 <h3 style="margin:14px 0 6px;color:#1e3a5f">1. 원고 입력하기</h3>
 <p>① 설교 제목, 본문 구절, 설교 일자를 입력합니다.<br>
 ② <b>설교 원고 전체</b> 칸에 원고를 붙여넣거나, 아래 <b>원고 파일 불러오기</b>에서 PDF·텍스트·워드 파일을 넣습니다.<br>
@@ -202,7 +211,8 @@ kbd{background:#eee;border:1px solid #ccc;border-radius:4px;padding:0 5px;font-s
 · <b>⛶ 전체화면</b>: 프롬프터만 크게 보기</p>
 <h3 style="margin:14px 0 6px;color:#1e3a5f">5. 원고 저장함</h3>
 <p><b>저장 이름</b>을 입력하고 <b>분류</b>를 고른 뒤 <b>저장</b>을 누르면 원고가 이 브라우저에 저장됩니다. 이름을 비워두면 제목·일자 순서로 자동 저장됩니다. <b>저장 목록 보기</b>에서 분류별로 볼 수 있습니다.<br>
-나중에 <b>불러오기</b>로 다시 꺼내 쓸 수 있습니다.</p>
+나중에 <b>불러오기</b>로 다시 꺼내 쓸 수 있습니다.<br>
+<b>저장 목록 내보내기</b>를 누르면 저장된 원고를 파일로 저장해 다른 기기로 옮길 수 있고, <b>저장 목록 가져오기</b>에서 그 파일을 다시 불러올 수 있습니다. 저장하지 않은 원고는 브라우저를 닫아도 임시 저장되어, 다음에 열 때 불러올 수 있습니다.</p>
 <h3 style="margin:14px 0 6px;color:#1e3a5f">6. 강단에서 사용하기</h3>
 <p>① <b>⬇ 프롬프터 HTML 다운로드</b> 버튼을 눌러 파일을 저장합니다.<br>
 ② 강단 컴퓨터나 태블릿에서 그 파일을 열기만 하면 됩니다.<br>
@@ -599,7 +609,7 @@ $('btn-save').onclick=()=>{
         date:$('f-date').value,verse:$('f-verse').value,
         category:cat,
         text:$('manuscript').value,savedAt:new Date().toISOString()};
-  setSaved(o);$('save-name').value='';refreshSaved();alert(`'${n}' 저장됐습니다.`);
+  setSaved(o);localStorage.removeItem('sermonPrompterDraft');$('save-name').value='';refreshSaved();alert(`'${n}' 저장됐습니다.`);
 };
 
 /* --- 독립 실행 HTML 다운로드 --- */
@@ -731,6 +741,79 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch((
   }
   var fi=$f('manuscript-file');
   if(fi) fi.addEventListener('change', function(){ var f=fi.files && fi.files[0]; fi.value=''; handleManuscriptFile(f); });
+})();
+</script>
+<script>
+/* --- 임시 저장(초안) + 저장 목록 백업 --- */
+const DRAFT_KEY='sermonPrompterDraft';
+function saveDraft(){
+  try{
+    const m=$('manuscript').value;
+    if(!m.trim()){localStorage.removeItem(DRAFT_KEY);return;}
+    localStorage.setItem(DRAFT_KEY,JSON.stringify({title:$('f-title').value,verse:$('f-verse').value,date:$('f-date').value,text:m,category:$('save-category').value,updatedAt:new Date().toISOString()}));
+  }catch(e){}
+}
+let draftTimer=null;
+function scheduleDraft(){clearTimeout(draftTimer);draftTimer=setTimeout(saveDraft,500);}
+['manuscript','f-title','f-verse','f-date','save-category'].forEach(function(id){var el=$(id);if(!el)return;el.addEventListener('input',scheduleDraft);el.addEventListener('change',scheduleDraft);});
+window.addEventListener('beforeunload',saveDraft);
+function showDraftBanner(){
+  try{
+    const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return;
+    const d=JSON.parse(raw);if(!d||!d.text||!d.text.trim())return;
+    if($('manuscript').value.trim()||$('f-title').value.trim()||$('f-verse').value.trim())return;
+    const info=$('draft-info');if(info)info.textContent=(d.title?d.title:'제목 없음')+(d.date?' · '+d.date:'');
+    const b=$('draft-banner');if(b)b.style.display='block';
+  }catch(e){}
+}
+(function(){
+  const loadBtn=$('draft-load');if(loadBtn)loadBtn.onclick=function(){
+    try{
+      const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');if(!d||!d.text)return;
+      $('f-title').value=d.title||'';$('f-verse').value=d.verse||'';$('f-date').value=d.date||'';$('save-category').value=d.category||'';$('manuscript').value=d.text;render();
+    }catch(e){}
+    const b=$('draft-banner');if(b)b.style.display='none';
+  };
+  const disBtn=$('draft-discard');if(disBtn)disBtn.onclick=function(){localStorage.removeItem(DRAFT_KEY);const b=$('draft-banner');if(b)b.style.display='none';};
+  showDraftBanner();
+})();
+function getExportJson(){
+  const o=getSaved();
+  return JSON.stringify({app:'sermon-prompter',version:1,exportedAt:new Date().toISOString(),items:o},null,2);
+}
+function importJson(text){
+  const parsed=JSON.parse(text);
+  const items=(parsed&&parsed.items&&typeof parsed.items==='object')?parsed.items:parsed;
+  if(!items||typeof items!=='object'||Array.isArray(items))throw new Error('bad format');
+  const o=getSaved();let added=0,skipped=0;
+  Object.keys(items).forEach(function(n){
+    const d=items[n];
+    if(!n||!d||typeof d!=='object'||typeof d.text!=='string'||!d.text.trim()){skipped++;return;}
+    let name=n;
+    if(o[name]){let k=2;while(o[name+' ('+k+')'])k++;name=name+' ('+k+')';}
+    o[name]=d;added++;
+  });
+  setSaved(o);refreshSaved();
+  return {added:added,skipped:skipped};
+}
+function setBackupStatus(msg){
+  const el=$('backup-status');if(el){el.textContent=msg;el.style.display='block';}
+}
+(function(){
+  const ex=$('btn-export');if(ex)ex.onclick=function(){
+    const o=getSaved();const names=Object.keys(o);
+    if(!names.length){alert('저장된 원고가 없습니다.');return;}
+    const blob=new Blob([getExportJson()],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='설교프롬프터-저장목록-'+localToday()+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    setBackupStatus('저장 목록 '+names.length+'개를 파일로 저장했습니다.');
+  };
+  const im=$('import-file');if(im)im.addEventListener('change',function(){
+    const f=im.files&&im.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=function(){try{const res=importJson(r.result);setBackupStatus(res.added+'개를 가져왔습니다.'+(res.skipped?' ('+res.skipped+'개는 건너뜀)':''));}catch(e){setBackupStatus('파일을 읽지 못했습니다. 설교프롬프터에서 내보낸 파일인지 확인하세요.');}};
+    r.onerror=function(){setBackupStatus('파일을 읽지 못했습니다.');};
+    r.readAsText(f);im.value='';
+  });
 })();
 </script>
 <div id="pastor-app-lock" style="position:fixed;inset:0;z-index:999999;background:#16283f;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Malgun Gothic',sans-serif">
